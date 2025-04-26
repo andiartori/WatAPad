@@ -7,19 +7,31 @@ use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Support\Str;
 use Cloudinary\Api\Upload\UploadApi;
 use Cloudinary\Api\Exception\ApiError;
+use Illuminate\Support\Collection;
+
 
 class ArticleService
 {
     // Fungsi untuk mendapatkan semua artikel
-    public function getAll()
+    public function getAll(): Collection
     {
-        return Article::all();
+        return Article::with('category')
+            ->orderBy('created_at', 'desc') // ambil yang terbaru dulu
+            ->get();
     }
 
     // Fungsi untuk mendapatkan artikel berdasarkan ID
     public function getById($id)
     {
-        return Article::find($id);
+        return Article::with(['category', 'user'])->find($id);
+    }
+
+    // Fungsi untuk mendapatkan artikel berdasarkan category_id
+    public function getByCategoryId($categoryId): Collection
+    {
+    return Article::with('category')
+        ->where('category_id', $categoryId)
+        ->get();
     }
 
     // Fungsi untuk membuat artikel baru
@@ -36,13 +48,15 @@ class ArticleService
 
         // Membuat artikel baru dengan uniqueId dan menyertakan gambar jika ada
         return Article::create([
-            'id'          => $uniqueId, // Menyertakan ID yang di-generate
+            'id'          => $uniqueId,
             'title'       => $data['title'],
+            'overview'    => $data['overview'] ?? null, // Tambahan ini
             'content'     => $data['content'],
             'user_id'     => $data['user_id'],
             'category_id' => $data['category_id'] ?? null,
-            'image_url'   => $imageUrl, // URL gambar yang diupload (atau null jika tidak ada gambar)
+            'image_url'   => $imageUrl,
         ]);
+        
     }
 
     // Fungsi untuk memperbarui artikel
@@ -60,11 +74,13 @@ class ArticleService
             unset($data['image']); // Eloquent gak tahu soal field ini
     
             $article->update([
-                'title' => $data['title'],
-                'content' => $data['content'],
+                'title'       => $data['title'],
+                'overview'    => $data['overview'] ?? $article->overview, // Tambahan ini
+                'content'     => $data['content'],
                 'category_id' => $data['category_id'] ?? $article->category_id,
-                'image_url' => $data['image_url'] ?? $article->image_url,
+                'image_url'   => $data['image_url'] ?? $article->image_url,
             ]);
+            
     
             return $article;
         }

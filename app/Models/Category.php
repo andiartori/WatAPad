@@ -30,4 +30,10 @@ class Category extends Model
     {
         return $this->hasMany(Article::class);
     }
+
+    // Tambah relasi ke User di Category model
+public function user()
+{
+    return $this->belongsTo(User::class);
+}
 }

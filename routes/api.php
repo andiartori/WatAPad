@@ -13,7 +13,9 @@ Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:sanct
 
 Route::get('/categories', [CategoryController::class, 'getAll']);
 Route::get('/categories/{id}', [CategoryController::class, 'getById']);
-Route::post('/categories', [CategoryController::class, 'store']);
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/categories', [CategoryController::class, 'store']);
+});
 Route::put('/categories/{id}', [CategoryController::class, 'update']);
 Route::delete('/categories/{id}', [CategoryController::class, 'delete']);
 
@@ -27,3 +29,4 @@ Route::middleware('auth:sanctum')->group(function () {
 
 Route::get('/articles', [ArticleController::class, 'getAll']); // Mendapatkan semua artikel
 Route::get('/articles/{id}', [ArticleController::class, 'getById']); // Mendapatkan artikel berdasarkan ID
+Route::get('/articles/category/{categoryId}', [ArticleController::class, 'getByCategoryId']);

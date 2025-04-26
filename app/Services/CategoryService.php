@@ -10,13 +10,13 @@ class CategoryService
     // Fungsi untuk mendapatkan semua kategori
     public function getAll()
     {
-        return Category::all();
+        return Category::with('articles')->get(); // menambahkan relasi
     }
 
     // Fungsi untuk mendapatkan kategori berdasarkan ID
     public function getById($id)
     {
-        return Category::find($id);
+        return Category::with('articles')->find($id); // menambahkan relasi
     }
 
     // Fungsi untuk membuat kategori baru
@@ -29,7 +29,7 @@ class CategoryService
             'id'          => $uniqueId,
             'name'        => $data['name'],
             'description' => $data['description'] ?? null,
-            'user_id'     => Auth::id(), // Simpan ID user saat ini
+            'user_id'     => Auth::id() ?? session('auth_user_id'), // <- bagian penting!
         ]);
     }
 
@@ -37,17 +37,21 @@ class CategoryService
     public function update($id, array $data)
     {
         $category = Category::find($id);
-
+    
         if (!$category) return null;
-
+    
+        // Ambil user_id dari data jika ada (session-based), kalau tidak pakai Auth::id() (API-based)
+        $currentUserId = $data['user_id'] ?? Auth::id();
+    
         // Cek ownership
-        if ($category->user_id !== Auth::id()) {
+        if ($category->user_id !== $currentUserId) {
             throw new \Exception('You do not have permission to update this category.');
         }
-
+    
         $category->update($data);
         return $category;
     }
+    
 
     // Fungsi untuk menghapus kategori (soft delete)
     public function delete($id)
@@ -57,9 +61,9 @@ class CategoryService
         if (!$category) return false;
 
         // Cek ownership
-        if ($category->user_id !== Auth::id()) {
+        if ($category->user_id !== (Auth::id() ?? session('auth_user_id'))) {
             throw new \Exception('You do not have permission to delete this category.');
-        }
+        }        
 
         $category->delete();
         return true;

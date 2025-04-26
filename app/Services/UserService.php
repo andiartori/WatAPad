@@ -47,16 +47,25 @@ class UserService
     // Fungsi untuk logout
     public function logout($user)
     {
-        // Hapus semua token user
-        $user->tokens->each(function ($token) {
-            $token->delete();
-        });
-
+        if (!$user) {
+            Log::warning("Logout attempted but user is null.");
+            return false;
+        }
+    
+        // Jika user menggunakan token-based (API), hapus semua token
+        if (method_exists($user, 'tokens')) {
+            $user->tokens->each(function ($token) {
+                $token->delete();
+            });
+            Log::info("User {$user->id} tokens deleted.");
+        }
+    
+        // Tambahan: log info logout
         Log::info("User {$user->id} logged out.");
-        
-        // Kembalikan status logout
+    
         return true;
     }
+    
 
     // Fungsi tambahan untuk validasi data registrasi
     protected function validateRegisterData(array $data)
@@ -81,5 +90,11 @@ class UserService
         } while (User::where('id', $uniqueId)->exists());  // Pastikan ID belum ada
 
         return $uniqueId;
+    }
+
+    //fungsi untuk mendapatkan detail user
+    public function getByEmail(string $email)
+    {
+    return User::where('email', $email)->firstOrFail();
     }
 }

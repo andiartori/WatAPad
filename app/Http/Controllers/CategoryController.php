@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use App\Services\CategoryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Auth; // ← Tambahkan ini
+
+
 
 class CategoryController extends Controller
 {
@@ -15,7 +18,7 @@ class CategoryController extends Controller
         $this->categoryService = $categoryService;
 
         // Hanya getAll dan getById yang bisa diakses publik, lainnya butuh token
-        $this->middleware('auth:sanctum')->except(['getAll', 'getById']);
+        
     }
 
     // Menampilkan semua kategori
@@ -39,26 +42,56 @@ class CategoryController extends Controller
 
         return Response::json(['error' => 'Category not found'], 404);
     }
-
-    // Menambahkan kategori baru
     public function store(Request $request)
     {
+        // Kalau dari Blade: pakai session
+        if (!$request->expectsJson() && !session()->has('auth_token')) {
+            return redirect('/login')->with('error', 'Silakan login dulu');
+        }
+    
+        // Kalau dari Postman: pakai Auth::id() dari Sanctum token
+        if ($request->expectsJson() && !Auth::check()) {
+            return response()->json(['error' => 'Unauthenticated.'], 401);
+        }
+    
         $validatedData = $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
         ]);
-
+    
         try {
+            // Tambahkan user_id ke data yang akan disimpan
+            if ($request->expectsJson()) {
+                // Dari Postman/API (pakai Sanctum)
+                $validatedData['user_id'] = Auth::id();
+            } else {
+                // Dari Blade Form (pakai session)
+                $validatedData['user_id'] = session('auth_user_id');
+            }
+    
             $category = $this->categoryService->create($validatedData);
-
-            return Response::json([
-                'message' => 'Category created successfully',
-                'category' => $category,
-            ], 201);
+    
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'message' => 'Category created successfully',
+                    'category' => $category,
+                ], 201);
+            }
+    
+            return redirect('/categories/create')->with('success', 'Category created successfully!');
         } catch (\Exception $e) {
-            return Response::json(['error' => $e->getMessage()], 400);
+            if ($request->expectsJson()) {
+                return response()->json(['error' => $e->getMessage()], 400);
+            }
+    
+            return back()->withErrors(['error' => $e->getMessage()]);
         }
     }
+    
+    
+    
+    
+    
 
     // Memperbarui kategori
     public function update(Request $request, $id)
@@ -107,4 +140,74 @@ class CategoryController extends Controller
             return Response::json(['error' => $e->getMessage()], 400);
         }
     }
+
+    //Fetching Server editpage untuk category
+    public function editPage()
+    {
+        if (!session()->has('auth_token')) {
+            return redirect('/login');
+        }
+    
+        $categories = $this->categoryService->getAll();
+    
+        return view('categories.edit', compact('categories'));
+    }
+    
+    //Fetching Server editpage untuk category PER ID
+    public function editForm($id)
+{
+    if (!session()->has('auth_token')) {
+        return redirect('/login');
+    }
+
+    $category = $this->categoryService->getById($id);
+
+    if (!$category) {
+        return redirect('/categories/edit')->withErrors(['error' => 'Kategori tidak ditemukan.']);
+    }
+
+    return view('categories.edit-form', compact('category'));
+}
+
+//endpoint untuk eksekusi FORM dari BLADE (NOTE PENTING SUPAYA INGAT : untuk create fungsi ini disatukan. tapi logicnya agak sulit di tracking  kalau error)
+public function updateFromBlade(Request $request, $id)
+{
+    if (!session()->has('auth_token')) {
+        return redirect('/login');
+    }
+
+    $validated = $request->validate([
+        'name' => 'required|string|max:255',
+        'description' => 'nullable|string',
+    ]);
+
+    try {
+        // Tambahkan user_id dari session untuk kebutuhan service
+        $validated['user_id'] = session('auth_user_id');
+
+        $this->categoryService->update($id, $validated);
+        return redirect('/categories/edit')->with('success', 'Kategori berhasil diperbarui.');
+    } catch (\Exception $e) {
+        return back()->withErrors(['error' => $e->getMessage()]);
+    }
+}
+
+public function deleteFromBlade($id)
+{
+    if (!session()->has('auth_token')) {
+        return redirect('/login')->withErrors(['error' => 'Silakan login terlebih dahulu.']);
+    }
+
+    try {
+        // Jalankan soft delete lewat service
+        $this->categoryService->delete($id);
+
+        return redirect()->route('categories.edit.page')->with('success', 'Kategori berhasil dihapus.');
+    } catch (\Exception $e) {
+        return redirect()->route('categories.edit.page')->withErrors(['error' => $e->getMessage()]);
+    }
+}
+
+
+
 }

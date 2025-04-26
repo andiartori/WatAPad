@@ -10,6 +10,7 @@ return new class extends Migration {
         Schema::create('articles', function (Blueprint $table) {
             $table->integer('id')->primary(); // Ubah dari auto-increment ke integer unik
             $table->string('title');
+            $table->text('overview')->nullable(); // Tambahan
             $table->text('content');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('category_id')->nullable()->constrained()->onDelete('set null');

@@ -14,30 +14,68 @@ class ArticleController extends Controller
     public function __construct(ArticleService $articleService)
     {
         $this->articleService = $articleService;
-        $this->middleware('auth:sanctum')->except(['getAll', 'getById']); // Autentikasi untuk selain getAll dan getById
-    }
-
-    // Menampilkan semua artikel
-    public function getAll()
-    {
-        $articles = $this->articleService->getAll();
-
-        return Response::json([
-            'articles' => $articles,
+        $this->middleware('auth:sanctum')->except([
+            'getAll',
+            'getById',
+            'getByCategoryId' // 👈 tambahkan ini
         ]);
     }
+
+    public function getAll(Request $request)
+    {
+        $categoryId = $request->query('category');
+    
+        if ($categoryId) {
+            $articles = $this->articleService->getByCategoryId($categoryId);
+        } else {
+            $articles = $this->articleService->getAll(); // yang udah jalan sebelumnya
+        }
+    
+        if ($request->wantsJson()) {
+            return response()->json(['articles' => $articles]);
+        }
+    
+        $categories = app(\App\Services\CategoryService::class)->getAll();
+    
+        return view('home', compact('articles', 'categories'));
+    }
+    
+    
+    
 
     // Menampilkan artikel berdasarkan ID
     public function getById($id)
     {
         $article = $this->articleService->getById($id);
-
-        if ($article) {
-            return Response::json(['article' => $article]);
+    
+        if (!$article) {
+            if (request()->wantsJson()) {
+                return response()->json(['error' => 'Article not found'], 404);
+            }
+            abort(404, 'Article not found');
         }
-
-        return Response::json(['error' => 'Article not found'], 404);
+    
+        if (request()->wantsJson()) {
+            return response()->json(['article' => $article]);
+        }
+    
+        // Kalau bukan JSON, tampilkan halaman detail Blade
+        return view('articles.show', ['article' => $article]);
     }
+
+    public function getByCategoryId(Request $request, $categoryId)
+    {
+        $articles = $this->articleService->getByCategoryId($categoryId);
+
+    if ($request->wantsJson()) {
+        return response()->json(['articles' => $articles]);
+    }
+
+        return view('home', compact('articles'));
+    }   
+
+    
+    
 
     // Menambahkan artikel baru
     public function store(Request $request)
@@ -45,10 +83,12 @@ class ArticleController extends Controller
         // Validasi input
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
+            'overview' => 'nullable|string', // Tambahan
             'content' => 'required|string',
             'category_id' => 'nullable|exists:categories,id',
-            'image' => 'nullable|image|max:10240', // Validasi file gambar
+            'image' => 'nullable|image|max:10240',
         ]);
+        
     
         try {
             // Cek jika file gambar ada dalam request
@@ -59,11 +99,13 @@ class ArticleController extends Controller
     
             $article = $this->articleService->create([
                 'title' => $validatedData['title'],
+                'overview' => $validatedData['overview'] ?? null,
                 'content' => $validatedData['content'],
                 'user_id' => auth()->id(),
                 'category_id' => $validatedData['category_id'],
-                'image' => $image, // Kirim file gambar yang ada
+                'image' => $image,
             ]);
+            
     
             return response()->json([
                 'message' => 'Article created successfully',
@@ -80,6 +122,7 @@ class ArticleController extends Controller
     {
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
+            'overview' => 'nullable|string', // Tambahan
             'content' => 'required|string',
             'category_id' => 'nullable|exists:categories,id',
             'image' => 'nullable|image|max:10240',
@@ -93,6 +136,7 @@ class ArticleController extends Controller
     
                 $updatedArticle = $this->articleService->update($id, [
                     'title' => $validatedData['title'],
+                    'overview' => $validatedData['overview'] ?? null,
                     'content' => $validatedData['content'],
                     'category_id' => $validatedData['category_id'] ?? null,
                     'image' => $image,
@@ -133,4 +177,10 @@ class ArticleController extends Controller
 
         return Response::json(['error' => 'Unauthorized or Article not found'], 403);
     }
+
+    
+
+    
 }
+
+
