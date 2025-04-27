@@ -96,40 +96,42 @@ class ArticlePageController extends Controller
 
     // Method untuk update artikel
     public function update(Request $request, $id)
-{
-    if (!session()->has('auth_token')) {
-        return redirect('/login')->with('error', 'Kamu harus login terlebih dahulu.');
-    }
-
-    $request->validate([
-        'title' => 'required|string|max:255',
-        'overview' => 'required|string',
-        'content' => 'required|string',
-        'category_id' => 'required|exists:categories,id',
-        'image' => 'nullable|image|max:2048',
-    ]);
-
-    $article = Article::findOrFail($id);
-
-    if ($article->user_id !== session('auth_user_id')) {
-        return redirect('/')->with('error', 'Kamu tidak berhak mengupdate artikel ini.');
+    {
+        if (!session()->has('auth_token')) {
+            return redirect('/login')->with('error', 'Kamu harus login terlebih dahulu.');
+        }
+    
+        $validatedData = $request->validate([
+            'title' => 'required|string|max:255',
+            'overview' => 'required|string',
+            'content' => 'required|string',
+            'category_id' => 'required|exists:categories,id',
+            'image' => 'nullable|image|max:10240', // max 10MB, sesuai Cloudinary
+        ]);
+    
+        $article = Article::findOrFail($id);
+    
+        if ($article->user_id !== session('auth_user_id')) {
+            return redirect('/')->with('error', 'Kamu tidak berhak mengupdate artikel ini.');
+        }
+    
+        $image = $request->file('image');
+    
+        try {
+            $this->articleService->update($id, [
+                'title' => $validatedData['title'],
+                'overview' => $validatedData['overview'],
+                'content' => $validatedData['content'],
+                'category_id' => $validatedData['category_id'],
+                'image' => $image, // bisa null kalau tidak upload gambar baru
+            ]);
+    
+            return redirect()->route('articles.manage')->with('success', 'Artikel berhasil diperbarui.');
+        } catch (\Exception $e) {
+            return back()->withInput()->with('error', 'Gagal mengupdate artikel: ' . $e->getMessage());
+        }
     }
     
-
-    $article->title = $request->title;
-    $article->overview = $request->overview;
-    $article->content = $request->content;
-    $article->category_id = $request->category_id;
-
-    if ($request->hasFile('image')) {
-        $imagePath = $request->file('image')->store('public/articles');
-        $article->image_url = basename($imagePath);
-    }
-
-    $article->save();
-
-    return redirect()->route('articles.manage')->with('success', 'Artikel berhasil diperbarui.');
-}
 
 
 public function deleteFromBlade($id)
