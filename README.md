@@ -1,61 +1,72 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# WatAPad
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+NOTE : deployment via hostinger sudah dilakukan. bisa menghubungi saya apabila membutuhkan url app tersebut. saya buat confidential agar tidak ada akses berlebihan untuk menjaga vps.
 
-## About Laravel
+**WatAPad** adalah aplikasi blog sederhana yang memungkinkan pengguna untuk membuat, mengedit, dan menghapus artikel.  
+Pengguna juga dapat mengelompokkan artikel ke dalam kategori serta melakukan registrasi dan login untuk mengelola artikel mereka.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## ✨ Deskripsi Fitur
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Artikel
+- Membuat artikel baru dengan judul, konten, dan kategori.
+- Mengedit artikel yang sudah ada. (sesuai dengan ownership)
+- Menghapus artikel. (sesuai dengan ownership)
+- Menampilkan daftar artikel dengan judul, ringkasan, dan tanggal publikasi.  (bisa upload gambar juga)
+- Menampilkan detail artikel saat diklik.
 
-## Learning Laravel
+### Kategori Artikel
+- Membuat kategori baru. (sesuai dengan ownership)
+- Mengaitkan artikel dengan kategori. (sesuai dengan ownership)
+- Menampilkan daftar kategori beserta artikel-artikel yang terkait.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### User
+- Registrasi akun pengguna baru.
+- Login dan logout.
+- Hanya pengguna yang sudah login yang dapat membuat, mengedit, atau menghapus artikel.
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 🛠️ Teknologi yang Digunakan
 
-## Laravel Sponsors
+### Backend
+- Framework: Laravel
+- Database: PostgreSQL (dideploy di VPS Hostinger)
+- Storage: Cloudinary untuk penyimpanan gambar
+- Package Manager: Composer
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Frontend
+- Template Engine: Blade (Laravel)
+- Styling: TailwindCSS (menggunakan Vite)
+- JavaScript: Untuk modifikasi DOM (sebagian kecil)
+- Hosting: VPS Hostinger
 
-### Premium Partners
+---
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development/)**
-- **[Active Logic](https://activelogic.com)**
+## 🚀 Cara Menjalankan Aplikasi di Lokal
 
-## Contributing
+1. Buat folder baru di komputer lokal dan buka menggunakan VSCode.
+2. Clone repository dengan perintah git clone https://github.com/andiartori/WatAPad.git
+3. Masuk ke dalam folder project menggunakan perintah cd WatAPad
+4. Buat file .env di root project.
+5. Masukkan data kredensial ke dalam file .env (data terdapat di attachment email).
+6. Jalankan perintah berikut di terminal:
+   - composer install
+   - npm install
+   - php artisan migrate
+   - npm run dev
+   - php artisan serve
+7. Akses aplikasi melalui URL localhost yang ditampilkan di terminal.
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+---
 
-## Code of Conduct
+## ⚡ Catatan Penting
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+- Perintah npm run dev digunakan untuk menjalankan TailwindCSS dan Vite di mode development.
+- Perintah php artisan serve digunakan untuk menjalankan server Laravel secara lokal.
+- Repository ini merupakan backup fullstack working version sebelum dilakukan npm run build, agar selalu memiliki cadangan project yang masih dalam mode development.
 
-## Security Vulnerabilities
+---
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
 
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
