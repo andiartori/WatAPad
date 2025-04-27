@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Services\CategoryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
-use Illuminate\Support\Facades\Auth; // ← Tambahkan ini
+use Illuminate\Support\Facades\Auth; 
 
 
 
@@ -60,7 +60,6 @@ class CategoryController extends Controller
         ]);
     
         try {
-            // Tambahkan user_id ke data yang akan disimpan
             if ($request->expectsJson()) {
                 // Dari Postman/API (pakai Sanctum)
                 $validatedData['user_id'] = Auth::id();
@@ -199,7 +198,6 @@ public function deleteFromBlade($id)
     }
 
     try {
-        // Jalankan soft delete lewat service
         $this->categoryService->delete($id);
 
         return redirect()->route('categories.edit.page')->with('success', 'Kategori berhasil dihapus.');

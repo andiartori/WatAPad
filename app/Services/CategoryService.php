@@ -10,26 +10,25 @@ class CategoryService
     // Fungsi untuk mendapatkan semua kategori
     public function getAll()
     {
-        return Category::with('articles')->get(); // menambahkan relasi
+        return Category::with('articles')->get(); 
     }
 
     // Fungsi untuk mendapatkan kategori berdasarkan ID
     public function getById($id)
     {
-        return Category::with('articles')->find($id); // menambahkan relasi
+        return Category::with('articles')->find($id); 
     }
 
     // Fungsi untuk membuat kategori baru
     public function create(array $data)
     {
-        // Generate ID unik 6 digit
         $uniqueId = $this->generateUniqueId();
 
         return Category::create([
             'id'          => $uniqueId,
             'name'        => $data['name'],
             'description' => $data['description'] ?? null,
-            'user_id'     => Auth::id() ?? session('auth_user_id'), // <- bagian penting!
+            'user_id'     => Auth::id() ?? session('auth_user_id'), // <- bagian penting! HATI-HATI SAMA SANCTUM
         ]);
     }
 
@@ -40,7 +39,6 @@ class CategoryService
     
         if (!$category) return null;
     
-        // Ambil user_id dari data jika ada (session-based), kalau tidak pakai Auth::id() (API-based)
         $currentUserId = $data['user_id'] ?? Auth::id();
     
         // Cek ownership
@@ -60,7 +58,6 @@ class CategoryService
 
         if (!$category) return false;
 
-        // Cek ownership
         if ($category->user_id !== (Auth::id() ?? session('auth_user_id'))) {
             throw new \Exception('You do not have permission to delete this category.');
         }        

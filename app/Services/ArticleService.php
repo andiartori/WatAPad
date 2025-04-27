@@ -16,7 +16,7 @@ class ArticleService
     public function getAll(): Collection
     {
         return Article::with('category')
-            ->orderBy('created_at', 'desc') // ambil yang terbaru dulu
+            ->orderBy('created_at', 'desc') 
             ->get();
     }
 
@@ -37,16 +37,15 @@ class ArticleService
     // Fungsi untuk membuat artikel baru
     public function create(array $data)
     {
-        // Generate ID unik 6 digit
+        // Generate ID unik 6 digit, Fungsinya dibawah
         $uniqueId = $this->generateUniqueId();
 
-        // Jika ada gambar, upload ke Cloudinary
+        // PROSES UPLOAD DISINI
         $imageUrl = null;
         if (isset($data['image']) && $data['image']) {
             $imageUrl = $this->uploadImageToCloudinary($data['image']);
         }
 
-        // Membuat artikel baru dengan uniqueId dan menyertakan gambar jika ada
         return Article::create([
             'id'          => $uniqueId,
             'title'       => $data['title'],
@@ -70,12 +69,11 @@ class ArticleService
                 $data['image_url'] = $this->uploadImageToCloudinary($data['image']);
             }
     
-            // Hapus elemen yang tidak ada di kolom database
-            unset($data['image']); // Eloquent gak tahu soal field ini
+            unset($data['image']); 
     
             $article->update([
                 'title'       => $data['title'],
-                'overview'    => $data['overview'] ?? $article->overview, // Tambahan ini
+                'overview'    => $data['overview'] ?? $article->overview, 
                 'content'     => $data['content'],
                 'category_id' => $data['category_id'] ?? $article->category_id,
                 'image_url'   => $data['image_url'] ?? $article->image_url,
@@ -105,10 +103,10 @@ class ArticleService
     // Fungsi untuk menghasilkan ID unik 6 digit
     protected function generateUniqueId(): int
     {
-        // Generate ID acak 6 digit
+        
         do {
             $uniqueId = random_int(100000, 999999);
-        } while (Article::where('id', $uniqueId)->exists()); // Pastikan ID belum ada
+        } while (Article::where('id', $uniqueId)->exists()); 
 
         return $uniqueId;
     }
@@ -124,11 +122,10 @@ class ArticleService
             \Log::info('Image original name: ' . $image->getClientOriginalName());
             \Log::info('Image path: ' . $image->getRealPath());
     
-            // Upload menggunakan UploadApi langsung (lebih eksplisit)
             $uploadApi = new UploadApi();
             $response = $uploadApi->upload($image->getRealPath(), [
                 'folder' => 'articles/',
-                'resource_type' => 'image', // pastikan tipe resource
+                'resource_type' => 'image', 
             ]);
     
             \Log::info('Cloudinary response:', $response->getArrayCopy());
@@ -146,12 +143,5 @@ class ArticleService
             throw new \Exception('Cloudinary upload failed: ' . $e->getMessage());
         }
     }
-    
-    
-    
-    
-    
-    
-    
     
 }

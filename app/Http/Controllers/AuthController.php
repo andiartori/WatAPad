@@ -31,20 +31,18 @@ class AuthController extends Controller
         try {
             $user = $this->userService->register($validatedData);
     
-            // Cek apakah request expects JSON (API)
+            // Cek apakah request datang dari API endPOint(PENTING)
             if ($request->wantsJson()) {
-                // Respon sukses dengan status 201 Created (untuk Postman/Front-End API)
                 return response()->json([
                     'message' => 'User registered successfully',
                     'user'    => $user,
                 ], 201);
             }
     
-            // Jika bukan JSON, berarti request dari form HTML
+            // Jika bukan JSON, berarti request dari Blade
             return redirect()->back()->with('success', 'Register berhasil!');
     
         } catch (\Exception $e) {
-            // Handle error
             if ($request->wantsJson()) {
                 return response()->json(['error' => $e->getMessage()], 400);
             }
@@ -63,28 +61,25 @@ class AuthController extends Controller
         ]);
     
         try {
-            // Panggil login dari service
             $token = $this->userService->login($validatedData['email'], $validatedData['password']);
 
             $user = $this->userService->getByEmail($validatedData['email']);
 
     
             if ($request->wantsJson()) {
-                // Untuk API client seperti Postman
                 return response()->json([
                     'message' => 'Login successful',
                     'token'   => $token,
-                    'auth_name' => $user->name, // disimpan buat navbar
-                    'user_id'    => $user->id, // <-- tambahkan ini
+                    'auth_name' => $user->name, 
+                    'user_id'    => $user->id, 
 
                 ]);
             }
     
-            // Untuk form biasa
             session([
                 'auth_token'    => $token,
                 'auth_name'     => $user->name,
-                'auth_user_id'  => $user->id, // Tambahan penting untuk form
+                'auth_user_id'  => $user->id, 
             ]);
 
             return redirect('/')->with('success', 'Login berhasil!');

@@ -41,12 +41,10 @@
 
 <script>
     function handleDelete(event, form) {
-        // Mengubah teks tombol dan disable
         const button = form.querySelector('button');
         button.innerText = 'Tunggu ya...';
         button.disabled = true;
 
-        // Membiarkan form untuk disubmit setelah perubahan
         form.submit();
     }
 </script>

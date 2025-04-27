@@ -67,20 +67,20 @@
             console.error(error);
         });
 
-    // Ganti tombol "Kirim" jadi "Tunggu ya..." dan validasi manual
+   
     document.getElementById('articleForm').addEventListener('submit', function(e) {
-        // Ambil isi dari CKEditor
+       
         const editorData = editorInstance.getData();
 
         if (editorData.trim() === '') {
-            e.preventDefault(); // Stop submit
+            e.preventDefault(); 
             alert('Konten wajib diisi!');
             return;
         }
 
         const submitButton = document.getElementById('submitButton');
         submitButton.innerText = 'Tunggu ya...';
-        submitButton.disabled = true; // Disable tombol
+        submitButton.disabled = true; 
     });
 </script>
 

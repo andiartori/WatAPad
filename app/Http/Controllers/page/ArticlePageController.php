@@ -20,38 +20,37 @@ class ArticlePageController extends Controller
         $this->categoryService = $categoryService;
         $this->articleService = $articleService;
     }
-
+//Create Article Page
     public function create()
     {
         if (!session()->has('auth_token')) {
             return redirect('/login')->with('error', 'Kamu harus login terlebih dahulu.');
         }
 
-        // Ambil kategori langsung dari service, tidak lewat API
         $categories = $this->categoryService->getAll();
 
         return view('articles.create', compact('categories'));
     }
 
+    //Create Article Page Execution
     public function store(Request $request)
     {
         if (!session()->has('auth_token')) {
             return redirect('/login')->with('error', 'Kamu harus login terlebih dahulu.');
         }
 
-        // Validasi input form
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
             'overview' => 'nullable|string',
             'content' => 'required|string',
             'category_id' => 'nullable|exists:categories,id',
-            'image' => 'nullable|image|max:10240', // max 10MB
+            'image' => 'nullable|image|max:10240', 
         ]);
 
         try {
             $image = $request->file('image');
 
-            // Kirim ke service untuk disimpan
+            
             $this->articleService->create([
                 'title' => $validatedData['title'],
                 'overview' => $validatedData['overview'] ?? null,
@@ -67,15 +66,15 @@ class ArticlePageController extends Controller
         }
     }
 
+    //Edit Page total 
     public function manage()
     {
-        // Cek apakah user sudah login berdasarkan session token
+        
         if (!session()->has('auth_token')) {
             return redirect('/login')->with('error', 'Kamu harus login dulu.');
         }
     
-        // Ambil data artikel langsung dari database (bukan lewat API)
-        $articles = Article::with('category') // kalau ada relasi kategori
+        $articles = Article::with('category') 
                         ->whereNull('deleted_at')
                         ->orderBy('created_at', 'desc')
                         ->get();
@@ -84,7 +83,7 @@ class ArticlePageController extends Controller
     }
 
 
-    // Method untuk menampilkan form edit
+    // Edit Page perId
     public function edit($id)
     {
         // Ambil artikel berdasarkan ID
@@ -94,7 +93,7 @@ class ArticlePageController extends Controller
         return view('articles.edit', compact('article', 'categories'));
     }
 
-    // Method untuk update artikel
+    // MEdit Execution
     public function update(Request $request, $id)
     {
         if (!session()->has('auth_token')) {
@@ -106,7 +105,7 @@ class ArticlePageController extends Controller
             'overview' => 'required|string',
             'content' => 'required|string',
             'category_id' => 'required|exists:categories,id',
-            'image' => 'nullable|image|max:10240', // max 10MB, sesuai Cloudinary
+            'image' => 'nullable|image|max:10240', 
         ]);
     
         $article = Article::findOrFail($id);
@@ -123,7 +122,7 @@ class ArticlePageController extends Controller
                 'overview' => $validatedData['overview'],
                 'content' => $validatedData['content'],
                 'category_id' => $validatedData['category_id'],
-                'image' => $image, // bisa null kalau tidak upload gambar baru
+                'image' => $image, 
             ]);
     
             return redirect()->route('articles.manage')->with('success', 'Artikel berhasil diperbarui.');
@@ -134,6 +133,7 @@ class ArticlePageController extends Controller
     
 
 
+    //Delete Execution 
 public function deleteFromBlade($id)
 {
     if (!session()->has('auth_token')) {

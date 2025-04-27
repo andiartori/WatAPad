@@ -21,6 +21,7 @@ class ArticleController extends Controller
         ]);
     }
 
+    //API untuk ALl GET
     public function getAll(Request $request)
     {
         $categoryId = $request->query('category');
@@ -28,7 +29,7 @@ class ArticleController extends Controller
         if ($categoryId) {
             $articles = $this->articleService->getByCategoryId($categoryId);
         } else {
-            $articles = $this->articleService->getAll(); // yang udah jalan sebelumnya
+            $articles = $this->articleService->getAll(); 
         }
     
         if ($request->wantsJson()) {
@@ -41,8 +42,6 @@ class ArticleController extends Controller
     }
     
     
-    
-
     // Menampilkan artikel berdasarkan ID
     public function getById($id)
     {
@@ -59,7 +58,7 @@ class ArticleController extends Controller
             return response()->json(['article' => $article]);
         }
     
-        // Kalau bukan JSON, tampilkan halaman detail Blade
+        // Kalau bukan JSON, tampilkan halaman detail Blade (PENTING)
         return view('articles.show', ['article' => $article]);
     }
 
@@ -83,7 +82,7 @@ class ArticleController extends Controller
         // Validasi input
         $validatedData = $request->validate([
             'title' => 'required|string|max:255',
-            'overview' => 'nullable|string', // Tambahan
+            'overview' => 'nullable|string', 
             'content' => 'required|string',
             'category_id' => 'nullable|exists:categories,id',
             'image' => 'nullable|image|max:10240',
@@ -112,7 +111,6 @@ class ArticleController extends Controller
                 'article' => $article,
             ], 201);
         } catch (\Exception $e) {
-            // Tangani jika ada error saat proses
             return response()->json(['error' => $e->getMessage()], 400);
         }
     }
@@ -132,7 +130,7 @@ class ArticleController extends Controller
     
         if ($article && $article->user_id === auth()->id()) {
             try {
-                $image = $request->file('image'); // Null kalau gak ada
+                $image = $request->file('image'); 
     
                 $updatedArticle = $this->articleService->update($id, [
                     'title' => $validatedData['title'],
@@ -160,7 +158,7 @@ class ArticleController extends Controller
     {
         $article = $this->articleService->getById($id);
 
-        // Pastikan artikel ditemukan dan hanya pemilik yang bisa menghapus
+        // Pastikan artikel ditemukan dan hanya pemilik yang bisa menghapus (OWNERSHIP)
         if ($article && $article->user_id === auth()->id()) {
             try {
                 $deleted = $this->articleService->delete($id);
